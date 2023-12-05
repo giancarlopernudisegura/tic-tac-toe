@@ -76,7 +76,7 @@ procedure main() returns integer {
                              ['7', '8', '9']];
     boolean turn = identity;
     boolean game_done = false;
-    loop while (!game_done) {
+    loop while (not game_done) {
         call print_board(board);
         "Choose a square (1-9): " -> std_output;
         integer square;
