@@ -1,0 +1,110 @@
+/**
+ * Returns whether play was valid.
+ */
+procedure play(var character[3, 3] board, integer x, integer y, character player) returns boolean {
+    if (player != 'X' and player != 'O') {
+        return false;
+    }
+    if (x < 1 or x > 3 or y < 1 or y > 3) {
+        return false;
+    }
+    if (board[x, y] != ' ') {
+        return false;
+    }
+    board[x, y] = player;
+}
+
+/**
+ * Prints the board to standard output.
+ */
+procedure print_board(character[3, 3] board) {
+    loop i in 1..3 {
+        if (i > 1)
+            "\n-----\n" -> std_output;
+        loop j in 1..3 {
+            if (j > 1)
+                '|' -> std_output;
+            board[i, j] -> std_output;
+        }
+    }
+    '\n' -> std_output;
+}
+
+/**
+ * Returns the winner of the game, or ' ' if no one has won yet.
+ * In the case of a tie, returns 'T'.
+ */
+procedure who_won(character[3, 3] board) returns character {
+    boolean tie = true;
+    // Check rows
+    loop i in 1..3 {
+        if (board[i, 1] == board[i, 2] and board[i, 2] == board[i, 3]) {
+            return board[i, 1];
+        }
+    }
+    // Check columns
+    loop j in 1..3 {
+        if (board[1, j] == board[2, j] and board[2, j] == board[3, j]) {
+            return board[1, j];
+        }
+    }
+    // Check diagonals
+    if (board[1, 1] == board[2, 2] and board[2, 2] == board[3, 3]) {
+        return board[1, 1];
+    }
+    if (board[1, 3] == board[2, 2] and board[2, 2] == board[3, 1]) {
+        return board[1, 3];
+    }
+
+    // Check for tie
+    loop i in 1..3, j in 1..3 {
+        if (board[i, j] == ' ') {
+            tie = false;
+            break;
+        }
+    }
+    if (tie) {
+        return 'T';
+    }
+
+    return ' ';
+}
+
+procedure main() returns integer {
+    character[3, 3] board = [['1', '2', '3'],
+                             ['4', '5', '6'],
+                             ['7', '8', '9']];
+    boolean turn = identity;
+    boolean game_done = false;
+    loop while (!game_done) {
+        call print_board(board);
+        "Choose a square (1-9): " -> std_output;
+        integer square;
+        square <- std_input;
+        integer x = (square - 1) / 3 + 1;
+        integer y = (square - 1) % 3 + 1;
+        // Human player plays
+        call play_board(board, x, y, 'X');
+        if (who_won(board) != ' ') {
+            game_done = true;
+            break;
+        }
+        // Computer plays
+        loop i in 1..3, j in 1..3 {
+            if (board[i, j] == ' ') {
+                call play_board(board, i, j, 'O');
+                break;
+            }
+        }
+        if (who_won(board) != ' ') {
+            game_done = true;
+            break;
+        }
+    }
+    if (who_won(board) == 'T') {
+        "Tie game!\n" -> std_output;
+    } else {
+        "Player " || who_won(board) || " won!\n" -> std_output;
+    }
+    return 0;
+}
